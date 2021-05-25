@@ -7,7 +7,7 @@
  * https://github.com/berndporr/iir1
  *
  * See Documentation.txt for contact information, notes, and bibliography.
- * 
+ *
  * -----------------------------------------------------------------
  *
  * License: MIT License (http://www.opensource.org/licenses/mit-license.php)
@@ -36,94 +36,86 @@
 #ifndef IIR1_CUSTOM_H
 #define IIR1_CUSTOM_H
 
-#include "Common.h"
 #include "Biquad.h"
 #include "Cascade.h"
+#include "Common.h"
 #include "PoleFilter.h"
 #include "State.h"
 
-
 namespace Iir {
 
-/**
- * Single pole, Biquad and cascade of Biquads with parameters allowing
- * for directly setting the parameters.
- **/
+  /**
+   * Single pole, Biquad and cascade of Biquads with parameters allowing
+   * for directly setting the parameters.
+   **/
 
-namespace Custom {
+  namespace Custom {
 
-/**
- * Setting up a filter with with one real pole, real zero and scale it by the scale factor
- * \param scale Scale the FIR coefficients by this factor
- * \param pole Position of the pole on the real axis
- * \param zero Position of the zero on the real axis
- **/
-struct OnePole : public Biquad
-{
-	void setup (double scale,
-		    double pole,
-		    double zero);
-};
+    /**
+     * Setting up a filter with with one real pole, real zero and scale it by the scale factor
+     * \param scale Scale the FIR coefficients by this factor
+     * \param pole Position of the pole on the real axis
+     * \param zero Position of the zero on the real axis
+     **/
+    struct OnePole : public Biquad {
+      void setup(double scale, double pole, double zero);
+    };
 
-/**
- * Set a pole/zero pair in polar coordinates and scale the FIR filter coefficients
- * \param poleRho Radius of the pole
- * \param poleTheta Angle of the pole
- * \param zeroRho Radius of the zero
- * \param zeroTheta Angle of the zero
- **/
-struct TwoPole : public Biquad
-{
-	void setup (double scale,
-		    double poleRho,
-		    double poleTheta,
-		    double zeroRho,
-		    double zeroTheta);
-};
+    /**
+     * Set a pole/zero pair in polar coordinates and scale the FIR filter coefficients
+     * \param poleRho Radius of the pole
+     * \param poleTheta Angle of the pole
+     * \param zeroRho Radius of the zero
+     * \param zeroTheta Angle of the zero
+     **/
+    struct TwoPole : public Biquad {
+      void setup(double scale, double poleRho, double poleTheta, double zeroRho, double zeroTheta);
+    };
 
-/**
- * A custom cascade of 2nd order (SOS / biquads) filters.
- * \param NSOS The number of 2nd order filters / biquads.
- * \param StateType The filter topology: DirectFormI, DirectFormII, ...
- **/
-template <unsigned int NSOS, class StateType = DEFAULT_STATE>
-struct DllExport SOSCascade : CascadeStages<NSOS,StateType>
-{
-	/**
-	 * Default constructor which creates a unity gain filter of NSOS biquads.
-	 * Set the filter coefficients later with the setup() method.
-	 **/
-	SOSCascade();
-	/**
-         * Python scipy.signal-friendly setting of coefficients.
-	 * Initialises the coefficients of the whole chain of
-	 * biquads / SOS. The argument is a 2D array where the 1st
-         * dimension holds an array of 2nd order biquad / SOS coefficients.
-         * The six SOS coefficients are ordered "Python" style with first
-         * the FIR coefficients (B) and then the IIR coefficients (A).
-         * The 2D const double array needs to have exactly the size [NSOS][6].
-	 * \param sosCoefficients 2D array Python style sos[NSOS][6]. Indexing: 0-2: FIR-, 3-5: IIR-coefficients.
-	 **/
-	SOSCascade(const double (&sosCoefficients)[NSOS][6]) {
-		CascadeStages<NSOS,StateType>::setup(sosCoefficients);
-	};
-	/**
-         * Python scipy.signal-friendly setting of coefficients.
-	 * Sets the coefficients of the whole chain of
-	 * biquads / SOS. The argument is a 2D array where the 1st
-         * dimension holds an array of 2nd order biquad / SOS coefficients.
-         * The six SOS coefficients are ordered "Python" style with first
-         * the FIR coefficients (B) and then the IIR coefficients (A).
-         * The 2D const double array needs to have exactly the size [NSOS][6].
-	 * \param sosCoefficients 2D array Python style sos[NSOS][6]. Indexing: 0-2: FIR-, 3-5: IIR-coefficients.
-	 **/
-	void setup (const double (&sosCoefficients)[NSOS][6]) {
-		CascadeStages<NSOS,StateType>::setup(sosCoefficients);
-	}
-};
+    /**
+     * A custom cascade of 2nd order (SOS / biquads) filters.
+     * \param NSOS The number of 2nd order filters / biquads.
+     * \param StateType The filter topology: DirectFormI, DirectFormII, ...
+     **/
+    template<unsigned int NSOS, class StateType = DEFAULT_STATE>
+    struct DllExport SOSCascade : CascadeStages<NSOS, StateType> {
+      /**
+       * Default constructor which creates a unity gain filter of NSOS biquads.
+       * Set the filter coefficients later with the setup() method.
+       **/
+      SOSCascade();
+      /**
+       * Python scipy.signal-friendly setting of coefficients.
+       * Initialises the coefficients of the whole chain of
+       * biquads / SOS. The argument is a 2D array where the 1st
+       * dimension holds an array of 2nd order biquad / SOS coefficients.
+       * The six SOS coefficients are ordered "Python" style with first
+       * the FIR coefficients (B) and then the IIR coefficients (A).
+       * The 2D const double array needs to have exactly the size [NSOS][6].
+       * \param sosCoefficients 2D array Python style sos[NSOS][6]. Indexing: 0-2: FIR-, 3-5:
+       *IIR-coefficients.
+       **/
+      SOSCascade(const double (&sosCoefficients)[NSOS][6]) {
+        CascadeStages<NSOS, StateType>::setup(sosCoefficients);
+      };
+      /**
+       * Python scipy.signal-friendly setting of coefficients.
+       * Sets the coefficients of the whole chain of
+       * biquads / SOS. The argument is a 2D array where the 1st
+       * dimension holds an array of 2nd order biquad / SOS coefficients.
+       * The six SOS coefficients are ordered "Python" style with first
+       * the FIR coefficients (B) and then the IIR coefficients (A).
+       * The 2D const double array needs to have exactly the size [NSOS][6].
+       * \param sosCoefficients 2D array Python style sos[NSOS][6]. Indexing: 0-2: FIR-, 3-5:
+       *IIR-coefficients.
+       **/
+      void setup(const double (&sosCoefficients)[NSOS][6]) {
+        CascadeStages<NSOS, StateType>::setup(sosCoefficients);
+      }
+    };
 
-}
+  }  // namespace Custom
 
-}
+}  // namespace Iir
 
 #endif
