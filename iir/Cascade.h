@@ -57,18 +57,18 @@ namespace Iir {
         struct DllExport Storage
         {
                 /**
-                 * Constructor which receives the pointer to the Biquad array and the number of Biquads
+                 * Copy-constructor which receives the pointer to the Biquad array and the number of Biquads
                  * \param maxStages_ Number of biquads
                  * \param stageArray_ The array of the Biquads
                  **/
-                Storage (int maxStages_, Biquad* stageArray_)
+                Storage (int maxStages_, Biquad* const stageArray_)
                 : maxStages (maxStages_)
                 , stageArray (stageArray_)
                 {
                 }
 
-                int maxStages;
-                Biquad* stageArray;
+                const int maxStages;
+                Biquad* const stageArray;
         };
 
         /**
@@ -142,7 +142,7 @@ namespace Iir {
          * \param sosCoefficients 2D array in Python style sos ordering: 0-2: FIR, 3-5: IIR coeff.
          **/
         void setup (const double (&sosCoefficients)[MaxStages][6]) {
-                for (unsigned int i = 0; i < MaxStages; i++) {
+                for (std::size_t i = 0; i < MaxStages; i++) {
                         m_stages[i].setCoefficients(
                                 sosCoefficients[i][3],
                                 sosCoefficients[i][4],
@@ -169,11 +169,13 @@ namespace Iir {
                 return static_cast<Sample> (out);
         }
 
-        Cascade::Storage getCascadeStorage()
+	/**
+	 * Returns the coefficients of the entire Biquad chain
+	 **/
+        const Cascade::Storage getCascadeStorage()
         {
                 return Cascade::Storage (MaxStages, m_stages);
         }
-
 
         private:
         Biquad m_stages[MaxStages];

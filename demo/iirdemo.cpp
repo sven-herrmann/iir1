@@ -8,7 +8,7 @@
 
 #include <stdio.h>
 
-int main (int,char**)
+int main(int, char**)
 {
 	const int order = 8;
 
@@ -20,18 +20,18 @@ int main (int,char**)
 	// Butterworth lowpass
 	Iir::Butterworth::LowPass<order> f;
 	double cutoff_frequency = 100; // Hz
-	f.setup (samplingrate, cutoff_frequency);
-	fimpulse = fopen("lp.dat","wt");
+	f.setup(samplingrate, cutoff_frequency);
+	fimpulse = fopen("lp.dat", "wt");
 	// let's simulated date streaming in
-	for(int i=0;i<1000;i++) 
+	for (int i = 0; i < 1000; i++)
 	{
-		double a=0;
-		if (i==10) a = 1;
+		double a = 0;
+		if (i == 10) a = 1;
 		double b = f.filter(a);
-		fprintf(fimpulse,"%e\n",b);
+		fprintf(fimpulse, "%e\n", b);
 	}
 	fclose(fimpulse);
-	
+
 	// RBJ highpass filter
 	// The Q factor determines the resonance at the
 	// cutoff frequency. If Q=1/sqrt(2) then the transition
@@ -40,64 +40,64 @@ int main (int,char**)
 	Iir::RBJ::HighPass hp;
 	const double hp_cutoff_frequency = 100;
 	const double hp_qfactor = 5;
-	hp.setup (samplingrate, hp_cutoff_frequency, hp_qfactor);
-	fimpulse = fopen("hp_rbj.dat","wt");
-	for(int i=0;i<1000;i++) 
+	hp.setup(samplingrate, hp_cutoff_frequency, hp_qfactor);
+	fimpulse = fopen("hp_rbj.dat", "wt");
+	for (int i = 0; i < 1000; i++)
 	{
-		double a=0;
-		if (i==10) a = 1;
+		double a = 0;
+		if (i == 10) a = 1;
 		double b = hp.filter(a);
-		fprintf(fimpulse,"%e\n",b);
+		fprintf(fimpulse, "%e\n", b);
 	}
 	fclose(fimpulse);
 
 	Iir::ChebyshevI::LowPass<8> lp_cheby1;
 	const float pass_ripple_db2 = 1; // dB
-	lp_cheby1.setup (samplingrate,
-			 cutoff_frequency,
-			 pass_ripple_db2);
-	fimpulse = fopen("lp_cheby1.dat","wt");
-	for(int i=0;i<1000;i++) 
+	lp_cheby1.setup(samplingrate,
+		cutoff_frequency,
+		pass_ripple_db2);
+	fimpulse = fopen("lp_cheby1.dat", "wt");
+	for (int i = 0; i < 1000; i++)
 	{
-		double a=0;
-		if (i==10) a = 1;
+		double a = 0;
+		if (i == 10) a = 1;
 		double b = lp_cheby1.filter(a);
-		fprintf(fimpulse,"%e\n",b);
+		fprintf(fimpulse, "%e\n", b);
 	}
 	fclose(fimpulse);
 
-	Iir::ChebyshevII::LowPass<8> lp_cheby2;
+	// Demo here if one has a pure digital
+	// system one can use normalised
+	// frequencies from 0 to 1/2 (Nyquist)
+	// where the frequency is 1/samples.
+	Iir::ChebyshevII::HighPass<order> hp_cheby2;
 	double stop_ripple_dB = 60;
-	lp_cheby2.setup (samplingrate,
-			 cutoff_frequency,
-			 stop_ripple_dB);
-	fimpulse = fopen("lp_cheby2.dat","wt");
-	for(int i=0;i<1000;i++) 
+	// Setting cutoff to normalised f=0.1
+	double normalised_cutoff_freq = 0.1;
+	hp_cheby2.setupN(normalised_cutoff_freq,
+		stop_ripple_dB);
+	fimpulse = fopen("hp_cheby2.dat", "wt");
+	for (int i = 0; i < 1000; i++)
 	{
-		double a=0;
-		if (i==10) a = 1;
-		double b = lp_cheby2.filter(a);
-		fprintf(fimpulse,"%e\n",b);
+		double a = 0;
+		if (i == 10) a = 1;
+		double b = hp_cheby2.filter(a);
+		fprintf(fimpulse, "%e\n", b);
 	}
 	fclose(fimpulse);
 
-	// Digital bandstop filter
-        // This is a filter which as infinite damping
-	// at the notch frequency because the zero of the
-	// filter is placed there. A resonance at the notch
-	// then tunes the width of the filter.
-	// The higher the Q factor the narrow the notch
-	// but the longer its impulse response (=ringing).
-	Iir::RBJ::IIRNotch bsn;
-	const float bs_frequency = 50;
-	bsn.setup (samplingrate, bs_frequency);
-	fimpulse = fopen("bs_rbj.dat","wt");
-	for(int i=0;i<1000;i++) 
+	// Bandstop filter with default order
+	Iir::Butterworth::BandStop<> bsn;
+	const double norm_center_frequency = 0.1;
+	const double norm_frequency_width = 0.01;
+	bsn.setupN(norm_center_frequency, norm_frequency_width);
+	fimpulse = fopen("bs_norm.dat", "wt");
+	for (int i = 0; i < 1000; i++)
 	{
-		double a=0;
-		if (i==10) a = 1;
+		double a = 0;
+		if (i == 10) a = 1;
 		double b = bsn.filter(a);
-		fprintf(fimpulse,"%e\n",b);
+		fprintf(fimpulse, "%e\n", b);
 	}
 	fclose(fimpulse);
 
@@ -118,17 +118,17 @@ int main (int,char**)
 	};
 	const int nSOS = sizeof(coeff) / sizeof(coeff[0]);
 	Iir::Custom::SOSCascade<nSOS> cust(coeff);
-	fimpulse = fopen("ellip.dat","wt");
-	for(int i=0;i<1000;i++) 
+	fimpulse = fopen("ellip.dat", "wt");
+	for (int i = 0; i < 1000; i++)
 	{
-		double a=0;
-		if (i==10) a = 1;
+		double a = 0;
+		if (i == 10) a = 1;
 		double b = cust.filter(a);
-		fprintf(fimpulse,"%e\n",b);
+		fprintf(fimpulse, "%e\n", b);
 	}
 	fclose(fimpulse);
 
-	
+
 
 	// generated with: "bessel_design.py"
 	const double coeff2[][6] = {
@@ -138,17 +138,17 @@ int main (int,char**)
 	};
 	const int nSOS2 = sizeof(coeff2) / sizeof(coeff2[0]);
 	Iir::Custom::SOSCascade<nSOS2> cust2(coeff2);
-	fimpulse = fopen("bessel.dat","wt");
-	for(int i=0;i<1000;i++) 
+	fimpulse = fopen("bessel.dat", "wt");
+	for (int i = 0; i < 1000; i++)
 	{
-		double a=0;
-		if (i==10) a = 1;
+		double a = 0;
+		if (i == 10) a = 1;
 		double b = cust2.filter(a);
-		fprintf(fimpulse,"%e\n",b);
+		fprintf(fimpulse, "%e\n", b);
 	}
 	fclose(fimpulse);
 
-	
+
 
 	printf("finished!\n");
 	printf("Now run `plot_impulse_fresponse.py` to display the impulse/frequency responses.\n");

@@ -31,6 +31,14 @@ All filters are available as lowpass, highpass, bandpass and bandstop/notch
 filters. Butterworth / Chebyshev offer also low/high/band-shelves with
 specified passband gain and 0dB gain in the stopband.
 
+The frequencies can either be analogue ones against the sampling rate
+or normalised ones between 0..1/2 where 1/2 is the Nyquist frequency. Note
+that normalised frequencies are simply f = F/Fs and are in units of 1/samples.
+Internally the library uses normalised frequencies and the setup commands
+simply divide by the sampling rate if given. Choose between:
+ 1. `setup`: sampling rate and the analogue cutoff frequencies
+ 2. `setupN`: normalised frequencies in 1/samples between f = 0..1/2 where 1/2 = Nyquist.
+
 See the header files in `\iir` or the documentation for the arguments
 of the `setup` commands.
 
@@ -45,7 +53,10 @@ const float samplingrate = 1000; // Hz
 const float cutoff_frequency = 5; // Hz
 f.setup (samplingrate, cutoff_frequency);
 ```
-
+or specify a normalised frequency between 0..1/2:
+```
+f.setupN(norm_cutoff_frequency);
+```
 
 2. Chebyshev Type I -- `ChebyshevI.h`
 With permissible passband ripple in dB.
@@ -55,6 +66,10 @@ const float passband_ripple_in_db = 5;
 f.setup (samplingrate,
          cutoff_frequency,
          passband_ripple_in_dB);
+```
+or specify a normalised frequency between 0..1/2:
+```
+f.setupN(norm_cutoff_frequency,passband_ripple_in_dB);
 ```
 
 
@@ -67,7 +82,10 @@ f.setup (samplingrate,
          cutoff_frequency,
          stopband_ripple_in_dB);
 ```
-
+or specify a normalised frequency between 0..1/2:
+```
+f.setupN(norm_cutoff_frequency,stopband_ripple_in_dB);
+```
 
 4. RBJ -- `RBJ.h`
 2nd order filters with cutoff and Q factor.
@@ -76,6 +94,10 @@ Iir::RBJ::LowPass f;
 const float cutoff_frequency = 100;
 const float Q_factor = 5;
 f.setup (samplingrate, cutoff_frequency, Q_factor);
+```
+or specify a normalised frequency between 0..1/2:
+```
+f.setupN(norm_cutoff_frequency, Q_factor);
 ```
 
 5. Designing filters with Python's scipy.signal -- `Custom.h`
@@ -272,19 +294,5 @@ exceptions in case a parameter is wrong. Any filter design
 requiring optimisation (for example Ellipic filters) has
 been removed and instead a function has been added which can import easily
 coefficients from scipy.
-
-## Bibliography
-
-```
-  "High-Order Digital Parametric Equalizer Design"
-   Sophocles J. Orfanidis
-   (Journal of the Audio Engineering Society, vol 53. pp 1026-1046)
-
-  "Spectral Transformations for digital filters"
-   A. G. Constantinides, B.Sc.(Eng.) Ph.D.
-   (Proceedings of the IEEE, vol. 117, pp. 1585-1590, August 1970)
-```
-
-Enjoy!
 
 Bernd Porr -- http://www.berndporr.me.uk
